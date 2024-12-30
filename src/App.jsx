@@ -1,4 +1,3 @@
-import React from 'react'
 import { useState, useEffect } from 'react'
 import './App.css'
 import mondaySdk from 'monday-sdk-js'
@@ -8,14 +7,14 @@ import { AttentionBox } from 'monday-ui-react-core'
 import LoginButton from './components/LoginButton'
 import SendMailButton from './components/SendMailButton'
 import UserInfo from './components/UserInfo'
-import AuthCallback from './components/AuthCallback'
 
 // Usage of mondaySDK example, for more information visit here: https://developer.monday.com/apps/docs/introduction-to-the-sdk/
 const monday = mondaySdk()
 
 const App = () => {
   const [context, setContext] = useState()
-  const [info, setInfo] = useState(null)
+  const [info, setInfo] = useState()
+  const [authCode, setAuthCode] = useState(null)
 
   useEffect(() => {
     // Notice this method notifies the monday platform that user gains a first value in an app.
@@ -42,12 +41,12 @@ const App = () => {
   const name = `WRD Mailer`
 
   return (
-    <div className='flex flex-col items-center justify-center'>
-      {!info && <LoginButton />}
-      <AuthCallback />
-      <UserInfo />
-      <AttentionBox title={name} text={attentionBoxText} type='success' />
-      {info && <SendMailButton />}
+    <div className='flex flex-col items-center justify-center min-h-screen'>
+      <LoginButton onCodeReceived={setAuthCode} />
+      <UserInfo authCode={authCode} />
+      {/* {!authCode && <LoginButton onCodeReceived={setAuthCode} />} */}
+      {/* <AttentionBox title={name} text={attentionBoxText} type='success' /> */}
+      {/* {info && <SendMailButton />} */}
     </div>
   )
 }
