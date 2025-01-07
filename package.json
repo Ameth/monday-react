@@ -12,6 +12,7 @@
     "stop": "kill-port 8301 && kill-port 4049 && kill-port 4040"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@mondaycom/apps-sdk": "^2.1.2",
     "axios": "^1.7.9",
     "firebase": "^11.1.0",

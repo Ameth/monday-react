@@ -68,7 +68,7 @@ export default function UserInfo({ authCode }) {
   if (loading) {
     return (
       <div className='text-center text-gray-500'>
-        Cargando información del usuario...
+        Loading user information...
       </div>
     )
   }
@@ -80,20 +80,19 @@ export default function UserInfo({ authCode }) {
   return (
     <div className='p-4 bg-slate-700 rounded-lg shadow-xl w-80'>
       <h2 className='text-xl font-semibold text-sky-400 mb-4'>
-        Información del Usuario
+        Authenticated user
       </h2>
       {userInfo ? (
         <div>
           <p className='text-white'>
-            <span className='font-semibold'>Nombre:</span>{' '}
-            {userInfo.displayName}
+            <span className='font-semibold'>Name:</span> {userInfo.displayName}
           </p>
           <p className='text-white'>
-            <span className='font-semibold'>Correo:</span> {userInfo.email}
+            <span className='font-semibold'>Email:</span> {userInfo.email}
           </p>
         </div>
       ) : (
-        <p className='text-red-600'>No se encontró información del usuario.</p>
+        <p className='text-red-600'>No user information found.</p>
       )}
     </div>
   )
