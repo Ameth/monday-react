@@ -3,16 +3,17 @@ const currentURL = window.location.href
 console.log('Current Hostname:', hostname)
 console.log('Current URL:', currentURL)
 
-// const isLocalhost = hostname === 'localhost'
+const isLocalhost = hostname === 'localhost'
 
-// const REDIRECT_URI = isLocalhost
-//   ? 'http://localhost:8301'
-//   : 'https://61050cac6ab1cf66.cdn2.monday.app'
+const REDIRECT_URI = isLocalhost
+  ? 'http://localhost:8301'
+  : `https://${hostname}`
 
 const CLIENT_ID = import.meta.env.VITE_CLIENT_ID
-const REDIRECT_URI = import.meta.env.VITE_REDIRECT_URI
 // const REDIRECT_URI = import.meta.env.VITE_REDIRECT_URI
-// console.log('redirect_uri:', REDIRECT_URI)
+// const REDIRECT_URI = `https://${hostname}`
+// const REDIRECT_URI = import.meta.env.VITE_REDIRECT_URI
+console.log('redirect_uri:', REDIRECT_URI)
 const AUTH_ENDPOINT =
   'https://login.microsoftonline.com/common/oauth2/v2.0/authorize'
 

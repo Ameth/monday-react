@@ -13,6 +13,7 @@ const ColumnMapper = ({ boardId }) => {
     bcc: '',
     subject: '',
     bodyTemplate: '',
+    attachments: '',
   })
   const [statusMessage, setStatusMessage] = useState(null) // State to hold success or error messages
   const [isLoading, setIsLoading] = useState(false) // State to track loading status
@@ -45,6 +46,7 @@ const ColumnMapper = ({ boardId }) => {
           bcc: data.emails?.bcc || '',
           subject: data.subject || '',
           bodyTemplate: data.bodyTemplate || '',
+          attachments: data.attachments || '',
         })
 
         setVariables(data.variables) // Store the current variables in the state
@@ -158,13 +160,8 @@ const ColumnMapper = ({ boardId }) => {
       },
       subject: emailColumns.subject,
       bodyTemplate: emailColumns.bodyTemplate,
-      variables: variables.reduce(
-        (acc, { variableName, columnId, columnTitle }) => {
-          acc[variableName] = { id: columnId, title: columnTitle }
-          return acc
-        },
-        {}
-      ),
+      attachments: emailColumns.attachments,
+      variables: variables
     }
     await onSaveMapping(formattedMapping)
   }
@@ -260,6 +257,24 @@ const ColumnMapper = ({ boardId }) => {
                   {col.title}
                 </option>
               ))}
+            </select>
+          </div>
+          <div className='flex flex-col'>
+            <label className='text-sm text-gray-400 mb-1'>Attachments</label>
+            <select
+              name='attachments'
+              value={emailColumns.attachments}
+              onChange={handleEmailColumnChange}
+              className='p-3 border rounded-lg shadow-sm bg-gray-800 text-white border-gray-600 focus:outline-none focus:ring focus:ring-blue-500'
+            >
+              <option value=''>(No column selected)</option>
+              {columns
+                .filter((col) => col.type === 'file')
+                .map((col) => (
+                  <option key={col.id} value={col.id}>
+                    {col.title}
+                  </option>
+                ))}
             </select>
           </div>
         </div>

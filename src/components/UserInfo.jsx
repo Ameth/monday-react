@@ -33,7 +33,7 @@ export default function UserInfo({ authCode }) {
           })
 
           if (!tokenResponse.ok) {
-            throw new Error('Error al intercambiar el código por tokens')
+            throw new Error('Error exchanging code for tokens')
           }
 
           const tokenData = await tokenResponse.json()
@@ -50,7 +50,7 @@ export default function UserInfo({ authCode }) {
         })
 
         if (!userResponse.ok) {
-          throw new Error('No se encontró información del usuario')
+            throw new Error('User information not found')
         }
 
         const userData = await userResponse.json()
