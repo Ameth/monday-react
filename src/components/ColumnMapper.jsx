@@ -17,7 +17,8 @@ const ColumnMapper = ({ boardId }) => {
     attachments: '',
   })
   const [statusMessage, setStatusMessage] = useState(null) // State to hold success or error messages
-  const [isLoading, setIsLoading] = useState(false) // State to track loading status
+  const [isAppLoading, setIsAppLoading] = useState(true) // Carga inicial de la app
+  const [isSaving, setIsSaving] = useState(false) // Loading del botón de guardar
 
   useEffect(() => {
     const loadColumns = async () => {
@@ -75,9 +76,25 @@ const ColumnMapper = ({ boardId }) => {
       }
     }
 
-    loadColumns()
-    loadAttachmentColumns()
-    loadVariables()
+    // loadColumns()
+    // loadAttachmentColumns()
+    // loadVariables()
+
+    const loadData = async () => {
+      try {
+        await Promise.all([
+          loadColumns(),
+          loadAttachmentColumns(),
+          loadVariables(),
+        ])
+      } catch (error) {
+        console.error('Error loading data:', error)
+      } finally {
+        setIsAppLoading(false) // Desactivar el loading después de cargar los datos
+      }
+    }
+
+    loadData()
   }, [boardId])
 
   const handleEmailColumnChange = (e) => {
@@ -141,7 +158,6 @@ const ColumnMapper = ({ boardId }) => {
   }
 
   const onSaveMapping = async (mapping) => {
-    setIsLoading(true)
     try {
       const response = await fetch(`${BACKEND_URL}/column-mapping/${boardId}`, {
         method: 'PUT',
@@ -156,19 +172,22 @@ const ColumnMapper = ({ boardId }) => {
           type: 'success',
           text: 'Mapping updated successfully!',
         })
+
+        // Limpiar el mensaje después de 6 segundos
+      setTimeout(() => setStatusMessage(null), 6000);
+
       } else {
-        throw new Error('Failed to update mapping')
+        const errorData = await response.json()
+        console.error('Error:', errorData)
+        throw new Error(errorData.message || 'Failed to update mapping')
       }
     } catch (error) {
       setStatusMessage({
         type: 'error',
-        text: 'Error updating mapping. Please try again.',
+        text: `Error updating mapping. ${error.message}. Please try again.`,
       })
-    } finally {
-      setIsLoading(false)
     }
 
-    setTimeout(() => setStatusMessage(null), 6000) // Clear the message after some seconds
   }
 
   const handleSave = async () => {
@@ -184,16 +203,26 @@ const ColumnMapper = ({ boardId }) => {
       attachments: emailColumns.attachments,
       variables: variables,
     }
+
+    setIsSaving(true) // Activar el loading
     await onSaveMapping(formattedMapping)
+    setIsSaving(false) // Desactivar el loading
   }
 
   return (
-    <div className='max-w-2xl mx-auto mt-4 bg-slate-700 text-gray-200 shadow-md rounded-lg p-8'>
+    <div className='relative max-w-2xl mx-auto mt-4 bg-slate-700 text-gray-200 shadow-md rounded-lg p-8'>
+      {(isAppLoading || isSaving) && (
+        <div className='absolute inset-0 bg-gray-800 bg-opacity-75 flex flex-col items-center justify-center z-50'>
+          <div className='animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500 border-opacity-75'></div>
+          <span className='text-white text-lg mt-4'>
+            {isAppLoading ? 'Loading data...' : 'Sending data...'}
+          </span>
+        </div>
+      )}
       <h3 className='text-2xl text-center font-semibold text-sky-400'>
         Manage Column Mapping
       </h3>
       <h3 className='text-center text-gray-300 mb-6'>Board: {boardId}</h3>
-
       <div className='mb-6'>
         <h4 className='font-bold text-sky-400 mb-2'>Email Columns</h4>
         <p className='my-1 text-gray-300'>
@@ -298,7 +327,6 @@ const ColumnMapper = ({ boardId }) => {
           </div>
         </div>
       </div>
-
       <div className='mb-6'>
         <h4 className='font-bold text-sky-400 mb-2'>Add New Variable</h4>
         <div className='flex flex-col md:flex-row gap-4 items-center mb-4'>
@@ -333,7 +361,6 @@ const ColumnMapper = ({ boardId }) => {
       </div>
       {/* <span>{JSON.stringify(newVariable)}</span> */}
       {/* <span>{JSON.stringify(variables)}</span> */}
-
       <h4 className='font-bold text-sky-400 mb-2'>Current Variables</h4>
       <div className='list-disc list-inside bg-gray-800 p-4 rounded-lg shadow-inner'>
         <div className='grid grid-cols-12 gap-2 border-b border-gray-600 pb-2 mb-2'>
@@ -384,7 +411,6 @@ const ColumnMapper = ({ boardId }) => {
           )}
         </ul>
       </div>
-
       <div className='mt-4'>
         <h4 className='font-bold text-sky-400 mb-2'>Instructions</h4>
         <p className='text-gray-300'>
@@ -399,31 +425,24 @@ const ColumnMapper = ({ boardId }) => {
       </div>
       <button
         onClick={handleSave}
-        disabled={isLoading}
+        disabled={isSaving}
         className={`mt-6 w-full py-3 rounded-lg shadow-lg transition-all text-white ${
-          isLoading
+          isSaving
             ? 'bg-gray-500 cursor-not-allowed'
-            : 'bg-green-600 hover:bg-green-700'
+            : 'bg-green-600 hover:bg-green-500'
         }`}
       >
-        {isLoading ? 'Saving...' : 'Save Changes'}
+        {isSaving ? 'Saving...' : 'Save Changes'}
       </button>
       {statusMessage && (
         <div
           className={`mt-4 p-4 rounded-lg text-center ${
             statusMessage.type === 'success'
-              ? 'bg-green-600 text-white'
-              : 'bg-red-600 text-white'
+              ? 'bg-green-200 text-green-800'
+              : 'bg-red-200 text-red-800'
           }`}
         >
           {statusMessage.text}
-        </div>
-      )}
-
-      {isLoading && (
-        <div className='flex items-center justify-center mt-4'>
-          <div className='animate-spin rounded-full h-8 w-8 border-t-4 border-blue-500 border-opacity-50'></div>
-          <span className='ml-2 text-gray-300'>Sending data...</span>
         </div>
       )}
     </div>
