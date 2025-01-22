@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react'
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
 
-export default function UserInfo({ authCode }) {
+export default function UserInfo({ authCode, boardId }) {
   const [userInfo, setUserInfo] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -29,7 +29,7 @@ export default function UserInfo({ authCode }) {
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ code: authCode }),
+            body: JSON.stringify({ code: authCode, boardId: boardId }),
           })
 
           if (!tokenResponse.ok) {
@@ -37,20 +37,23 @@ export default function UserInfo({ authCode }) {
           }
 
           const tokenData = await tokenResponse.json()
-          console.log('Token data form backend:', tokenData)
+          // console.log('Token data form backend:', tokenData)
         }
 
         // Obtener la información del usuario
-        const userResponse = await fetch(`${BACKEND_URL}/user-info`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            // 'Authorization': `Bearer ${accessToken}`,
-          },
-        })
+        const userResponse = await fetch(
+          `${BACKEND_URL}/user-info/${boardId}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              // 'Authorization': `Bearer ${accessToken}`,
+            },
+          }
+        )
 
         if (!userResponse.ok) {
-            throw new Error('User information not found')
+          throw new Error('User information not found')
         }
 
         const userData = await userResponse.json()
@@ -63,7 +66,32 @@ export default function UserInfo({ authCode }) {
     }
 
     fetchUserInfo()
-  }, [authCode])
+  }, [authCode, boardId])
+
+  const handleLogout = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch(`${BACKEND_URL}/user-logout/${boardId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to log out')
+      }
+
+      setUserInfo(null) // Limpia la información del usuario
+      // alert('Logout successful!')
+    } catch (err) {
+      console.error('Error logging out:', err)
+      setError(err.message)
+      // alert('Error logging out')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -90,6 +118,12 @@ export default function UserInfo({ authCode }) {
           <p className='text-white'>
             <span className='font-semibold'>Email:</span> {userInfo.email}
           </p>
+          <button
+            className='mt-4 bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700'
+            onClick={handleLogout}
+          >
+            Log Out
+          </button>
         </div>
       ) : (
         <p className='text-red-600'>No user information found.</p>

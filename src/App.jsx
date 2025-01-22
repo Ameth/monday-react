@@ -49,7 +49,7 @@ const App = () => {
   return (
     <div className='flex flex-col items-center justify-center min-h-screen'>
       <LoginButton onCodeReceived={setAuthCode} />
-      <UserInfo authCode={authCode} />
+      <UserInfo authCode={authCode} boardId={boardId} />
       <ColumnMapper boardId={boardId} />
       {/* {!authCode && <LoginButton onCodeReceived={setAuthCode} />} */}
       {/* <AttentionBox text={attentionBoxText} type='success' /> */}
