@@ -5,6 +5,7 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
 
 const ColumnMapper = ({ boardId }) => {
   const [columns, setColumns] = useState([])
+  const [fileColumns, setFileColumns] = useState([])
   const [variables, setVariables] = useState([])
   const [newVariable, setNewVariable] = useState({ key: '', columnId: '' })
   const [emailColumns, setEmailColumns] = useState({
@@ -34,6 +35,25 @@ const ColumnMapper = ({ boardId }) => {
       }
     }
 
+    const loadAttachmentColumns = async () => {
+      try {
+        const response = await fetch(
+          `${BACKEND_URL}/column-attachment/${boardId}`
+        )
+        const data = await response.json()
+
+        const fileColumns = data.columns?.map((col) => ({
+          id: col.id,
+          title: col.title,
+          type: col.type,
+        }))
+
+        setFileColumns(fileColumns)
+      } catch (error) {
+        console.error('Error loading attachment columns:', error)
+      }
+    }
+
     const loadVariables = async () => {
       try {
         const response = await fetch(`${BACKEND_URL}/column-mapping/${boardId}`)
@@ -56,6 +76,7 @@ const ColumnMapper = ({ boardId }) => {
     }
 
     loadColumns()
+    loadAttachmentColumns()
     loadVariables()
   }, [boardId])
 
@@ -161,7 +182,7 @@ const ColumnMapper = ({ boardId }) => {
       subject: emailColumns.subject,
       bodyTemplate: emailColumns.bodyTemplate,
       attachments: emailColumns.attachments,
-      variables: variables
+      variables: variables,
     }
     await onSaveMapping(formattedMapping)
   }
@@ -268,13 +289,11 @@ const ColumnMapper = ({ boardId }) => {
               className='p-3 border rounded-lg shadow-sm bg-gray-800 text-white border-gray-600 focus:outline-none focus:ring focus:ring-blue-500'
             >
               <option value=''>(No column selected)</option>
-              {columns
-                .filter((col) => col.type === 'file')
-                .map((col) => (
-                  <option key={col.id} value={col.id}>
-                    {col.title}
-                  </option>
-                ))}
+              {fileColumns.map((col) => (
+                <option key={col.id} value={col.id}>
+                  {col.title}
+                </option>
+              ))}
             </select>
           </div>
         </div>
